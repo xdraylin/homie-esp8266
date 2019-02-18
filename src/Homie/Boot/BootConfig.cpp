@@ -360,32 +360,33 @@ void BootConfig::_onDeviceInfoRequest(AsyncWebServerRequest *request) {
 
   JsonArray& settings = json.createNestedArray("settings");
   for (IHomieSetting* iSetting : IHomieSetting::settings) {
-    JsonObject& jsonSetting = jsonBuffer.createObject();
+    if (! iSetting->isInternal()) {
+      JsonObject& jsonSetting = jsonBuffer.createObject();
+      if (strcmp(iSetting->getType(), "unknown") != 0) {
+        jsonSetting["name"] = iSetting->getName();
+        jsonSetting["description"] = iSetting->getDescription();
+        jsonSetting["type"] = iSetting->getType();
+        jsonSetting["required"] = iSetting->isRequired();
 
-    if (strcmp(iSetting->getType(), "unknown") != 0) {
-      jsonSetting["name"] = iSetting->getName();
-      jsonSetting["description"] = iSetting->getDescription();
-      jsonSetting["type"] = iSetting->getType();
-      jsonSetting["required"] = iSetting->isRequired();
-
-      if (!iSetting->isRequired()) {
-        if (iSetting->isBool()) {
-          HomieSetting<bool>* setting = static_cast<HomieSetting<bool>*>(iSetting);
-          jsonSetting["default"] = setting->get();
-        } else if (iSetting->isLong()) {
-          HomieSetting<long>* setting = static_cast<HomieSetting<long>*>(iSetting);
-          jsonSetting["default"] = setting->get();
-        } else if (iSetting->isDouble()) {
-          HomieSetting<double>* setting = static_cast<HomieSetting<double>*>(iSetting);
-          jsonSetting["default"] = setting->get();
-        } else if (iSetting->isConstChar()) {
-          HomieSetting<const char*>* setting = static_cast<HomieSetting<const char*>*>(iSetting);
-          jsonSetting["default"] = setting->get();
+        if (!iSetting->isRequired()) {
+          if (iSetting->isBool()) {
+            HomieSetting<bool>* setting = static_cast<HomieSetting<bool>*>(iSetting);
+            jsonSetting["default"] = setting->get();
+          } else if (iSetting->isLong()) {
+            HomieSetting<long>* setting = static_cast<HomieSetting<long>*>(iSetting);
+            jsonSetting["default"] = setting->get();
+          } else if (iSetting->isDouble()) {
+            HomieSetting<double>* setting = static_cast<HomieSetting<double>*>(iSetting);
+            jsonSetting["default"] = setting->get();
+          } else if (iSetting->isConstChar()) {
+            HomieSetting<const char*>* setting = static_cast<HomieSetting<const char*>*>(iSetting);
+            jsonSetting["default"] = setting->get();
+          }
         }
       }
-    }
 
-    settings.add(jsonSetting);
+      settings.add(jsonSetting);
+    }
   }
 
   String output;

@@ -8,11 +8,16 @@ HomieInternals::IHomieSetting::IHomieSetting(const char * name, const char * des
   : _name(name)
   , _description(description)
   , _required(true)
-  , _provided(false) {
+  , _provided(false)
+  , _internal(false) {
 }
 
 bool IHomieSetting::isRequired() const {
   return _required;
+}
+
+bool IHomieSetting::isInternal() const {
+  return _internal;
 }
 
 const char* IHomieSetting::getName() const {
@@ -36,6 +41,11 @@ HomieSetting<T>::HomieSetting(const char* name, const char* description)
 template <class T>
 T HomieSetting<T>::get() const {
   return _value;
+}
+
+template <class T>
+void HomieSetting<T>::makeInternal() {
+  _internal = true;
 }
 
 template <class T>

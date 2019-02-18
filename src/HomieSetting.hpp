@@ -17,6 +17,7 @@ class IHomieSetting {
   static std::vector<IHomieSetting*> settings;
 
   bool isRequired() const;
+  bool isInternal() const;
   const char* getName() const;
   const char* getDescription() const;
 
@@ -33,6 +34,7 @@ class IHomieSetting {
   const char* _description;
   bool _required;
   bool _provided;
+  bool _internal;
 };
 }  // namespace HomieInternals
 
@@ -46,6 +48,7 @@ class HomieSetting : public HomieInternals::IHomieSetting {
  public:
   HomieSetting(const char* name, const char* description);
   T get() const;
+  void makeInternal();
   bool wasProvided() const;
   HomieSetting<T>& setDefaultValue(T defaultValue);
   HomieSetting<T>& setValidator(const std::function<bool(T candidate)>& validator);
