@@ -1,5 +1,9 @@
 #include "Config.hpp"
 
+#ifdef ESP32
+#include <SPIFFS.h>
+#endif
+
 using namespace HomieInternals;
 
 Config::Config()
@@ -10,7 +14,13 @@ Config::Config()
 
 bool Config::_spiffsBegin() {
   if (!_spiffsBegan) {
+    #ifdef ESP32
+    _spiffsBegan = SPIFFS.begin(true);
+    #elif defined(ESP8266)
     _spiffsBegan = SPIFFS.begin();
+    #else
+    #error Platform not supported
+    #endif
     if (!_spiffsBegan) Interface::get().getLogger() << F("✖ Cannot mount filesystem") << endl;
   }
 

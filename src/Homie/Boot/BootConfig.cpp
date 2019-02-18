@@ -208,24 +208,51 @@ void BootConfig::_generateNetworksJson() {
     JsonObject& jsonNetwork = generatedJsonBuffer.createObject();
     jsonNetwork["ssid"] = WiFi.SSID(network);
     jsonNetwork["rssi"] = WiFi.RSSI(network);
-    switch (WiFi.encryptionType(network)) {
-    case ENC_TYPE_WEP:
-      jsonNetwork["encryption"] = "wep";
-      break;
-    case ENC_TYPE_TKIP:
-      jsonNetwork["encryption"] = "wpa";
-      break;
-    case ENC_TYPE_CCMP:
-      jsonNetwork["encryption"] = "wpa2";
-      break;
-    case ENC_TYPE_NONE:
-      jsonNetwork["encryption"] = "none";
-      break;
-    case ENC_TYPE_AUTO:
-      jsonNetwork["encryption"] = "auto";
-      break;
-    }
 
+    /* Ugly */
+    switch (WiFi.encryptionType(network)) {
+    #ifdef ESP32
+      case WIFI_AUTH_WEP:
+        jsonNetwork["encryption"] = "wep";
+        break;
+      case WIFI_AUTH_WPA_PSK:
+        jsonNetwork["encryption"] = "wpa";
+        break;
+      case WIFI_AUTH_WPA2_PSK:
+        jsonNetwork["encryption"] = "wpa2";
+        break;
+      case WIFI_AUTH_WPA_WPA2_PSK:
+        jsonNetwork["encryption"] = "wpa_wpa2";
+        break;
+      case WIFI_AUTH_WPA2_ENTERPRISE:
+        jsonNetwork["encryption"] = "wpa2_enterprise";
+        break;
+      case WIFI_AUTH_OPEN:
+        jsonNetwork["encryption"] = "none";
+        break;
+      case WIFI_AUTH_MAX:
+        jsonNetwork["encryption"] = "auto";
+        break;
+      #elif defined(ESP8266)
+      case ENC_TYPE_WEP:
+        jsonNetwork["encryption"] = "wep";
+        break;
+      case ENC_TYPE_TKIP:
+        jsonNetwork["encryption"] = "wpa";
+        break;
+      case ENC_TYPE_CCMP:
+        jsonNetwork["encryption"] = "wpa2";
+        break;
+      case ENC_TYPE_NONE:
+        jsonNetwork["encryption"] = "none";
+        break;
+      case ENC_TYPE_AUTO:
+        jsonNetwork["encryption"] = "auto";
+        break;
+      #else
+      #error Platform not supported
+      #endif
+    }
     networks.add(jsonNetwork);
   }
 

@@ -1,5 +1,9 @@
 #include "Homie.hpp"
 
+#if defined(ESP32) && !defined(LED_BUILTIN)
+  #define LED_BUILTIN 21
+#endif
+
 using namespace HomieInternals;
 
 HomieClass::HomieClass()
@@ -9,7 +13,11 @@ HomieClass::HomieClass()
   strlcpy(Interface::get().brand, DEFAULT_BRAND, MAX_BRAND_LENGTH);
   Interface::get().bootMode = HomieBootMode::UNDEFINED;
   Interface::get().configurationAp.secured = false;
+  #ifdef ESP32
+  Interface::get().led.enabled = false;
+  #else
   Interface::get().led.enabled = true;
+  #endif
   Interface::get().led.pin = LED_BUILTIN;
   Interface::get().led.on = LOW;
   Interface::get().reset.idle = true;
@@ -345,10 +353,18 @@ void HomieClass::prepareToSleep() {
   }
 }
 
+#ifdef ESP32
+void HomieClass::doDeepSleep(uint32_t time_us) {
+  Interface::get().getLogger() << F("💤 Device is deep sleeping...") << endl;
+  Serial.flush();
+  ESP.deepSleep(time_us);
+}
+#else
 void HomieClass::doDeepSleep(uint32_t time_us, RFMode mode) {
   Interface::get().getLogger() << F("💤 Device is deep sleeping...") << endl;
   Serial.flush();
   ESP.deepSleep(time_us, mode);
 }
+#endif
 
 HomieClass Homie;

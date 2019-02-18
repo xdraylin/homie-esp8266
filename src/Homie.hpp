@@ -65,7 +65,12 @@ class HomieClass {
   AsyncMqttClient& getMqttClient();
   Logger& getLogger();
   static void prepareToSleep();
+
+  #ifdef ESP32
+  static void doDeepSleep(uint32_t time_us = 0);
+  #else
   static void doDeepSleep(uint32_t time_us = 0, RFMode mode = RF_DEFAULT);
+  #endif
 
  private:
   bool _setupCalled;

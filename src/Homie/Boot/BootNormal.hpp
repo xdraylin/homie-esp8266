@@ -2,10 +2,19 @@
 
 #include "Arduino.h"
 
-#include <functional>
-#include <libb64/cdecode.h>
+#ifdef ESP32
+#include <WiFi.h>
+#include <ESPmDNS.h>
+#include <Update.h>
+#elif defined(ESP8266)
 #include <ESP8266WiFi.h>
 #include <ESP8266mDNS.h>
+#else
+#error Platform not supported
+#endif
+
+#include <functional>
+#include <libb64/cdecode.h>
 #include <AsyncMqttClient.h>
 #include "../../HomieNode.hpp"
 #include "../../HomieRange.hpp"
@@ -65,8 +74,10 @@ class BootNormal : public Boot {
   Timer _statsTimer;
   ExponentialBackoffTimer _mqttReconnectTimer;
   bool _setupFunctionCalled;
+  #ifdef ESP8266
   WiFiEventHandler _wifiGotIpHandler;
   WiFiEventHandler _wifiDisconnectedHandler;
+  #endif
   bool _mqttConnectNotified;
   bool _mqttDisconnectNotified;
   bool _otaOngoing;
@@ -88,8 +99,15 @@ class BootNormal : public Boot {
   uint8_t _mqttTopicLevelsCount;
 
   void _wifiConnect();
+  #ifdef ESP32
+  void _onWifiGotIp(system_event_id_t event, system_event_info_t info);
+  void _onWifiDisconnected(system_event_id_t event, system_event_info_t info);
+  #elif defined(ESP8266)
   void _onWifiGotIp(const WiFiEventStationModeGotIP& event);
   void _onWifiDisconnected(const WiFiEventStationModeDisconnected& event);
+  #else
+  #error Platform not supported
+  #endif
   void _mqttConnect();
   void _advertise();
   void _onMqttConnected();
